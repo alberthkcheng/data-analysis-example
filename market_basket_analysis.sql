@@ -21,12 +21,19 @@ bestsellers AS(
   FROM product_frequency
   LIMIT 10
 ), 
+bestsellers_transaction AS(
+  --  Optimization - only get orders which contains top 10 best seller before cross join
+  -- Get top 10 best sellers
+  SELECT transactions.*
+  FROM transactions
+  JOIN (SELECT DISTINCT OrderID FROM transactions JOIN bestsellers ON transactions.ProductID == bestsellers.ProductID) AS bestsellers_order
+  ON transactions.OrderID == bestsellers_order.OrderID
+), 
 basket_rules AS(
   -- Generate association rules by cross joining product within each transaction
   SELECT transactionsA.ProductID AS ProductA, transactionsB.ProductID AS ProductB, count(*) AS Occurrences
-  FROM transactions AS transactionsA
-  -- Potential Optimization - only get orders which contains top 10 best seller before cross join
-  JOIN transactions AS transactionsB 
+  FROM bestsellers_transaction AS transactionsA
+  JOIN bestsellers_transaction AS transactionsB 
   ON transactionsA.OrderID == transactionsB.OrderID AND transactionsA.ProductID <> transactionsB.ProductID
   GROUP BY transactionsA.ProductID, transactionsB.ProductID
   ORDER BY count(*) DESC
@@ -35,7 +42,9 @@ basket_rules AS(
 -- SELECT * FROM total_transactions limit 20 -- Toggle comment to test
 -- SELECT * FROM product_frequency limit 20 -- Toggle comment to test
 -- SELECT * FROM bestsellers limit 20 -- Toggle comment to test
--- SELECT * FROM basket_rules limit 20 -- Toggle comment to test
+-- SELECT * FROM bestsellers_transaction -- limit 20 -- Toggle comment to test
+-- SELECT * FROM basket_rules -- limit 20 -- Toggle comment to test
+
 SELECT ProductA, ProductB, Occurrences, 
   Occurrences/total_transactions.TotalTransaction AS Support,
   Occurrences/bestsellers.Frequency AS Confidence,
