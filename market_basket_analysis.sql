@@ -25,6 +25,7 @@ basket_rules AS(
   -- Generate association rules by cross joining product within each transaction
   SELECT transactionsA.ProductID AS ProductA, transactionsB.ProductID AS ProductB, count(*) AS Occurrences
   FROM transactions AS transactionsA
+  -- Potential Optimization - only get orders which contains top 10 best seller before cross join
   JOIN transactions AS transactionsB 
   ON transactionsA.OrderID == transactionsB.OrderID AND transactionsA.ProductID <> transactionsB.ProductID
   GROUP BY transactionsA.ProductID, transactionsB.ProductID
