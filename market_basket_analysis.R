@@ -1,19 +1,18 @@
 # Market Basket Analysis
 # Reference: https://towardsdatascience.com/a-gentle-introduction-on-market-basket-analysis-association-rules-fa4b986a40ce
 
-
 # SQL solution tested with Spark local cluster
 library(sparklyr)
 library(tidyverse)
 library(DBI)
 sc <- spark_connect(master = "local")
 sample_orders <- read_csv("input/SampleOrders.csv")
-sample_orders <- copy_to(sc, sample_orders, overwrite = TRUE)
+copy_to(sc, sample_orders, overwrite = TRUE)
 dbGetQuery(sc, read_file("market_basket_analysis.sql"))
 
 
 
-# R Solution
+# R Solution for reference
 # library(data.table)
 # library(arules)
 # 
